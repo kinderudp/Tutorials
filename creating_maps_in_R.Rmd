@@ -1,0 +1,78 @@
+---
+title: "Creating Maps in R"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    theme: spacelab
+    highlight: haddock
+
+---
+
+# Preliminaries
+Make sure you head over to the tutorial "Reading Spatial Data in R" before continuing. 
+# Basic Mapping
+Say we've read in the shapefile containing the superneighborhoods for the Houston area:
+
+```{r eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE, paged.print=FALSE}
+library(RColorBrewer)
+library(rgdal)
+snbr <- readOGR("Data/SNBR/SNBR.shp")
+```
+
+Right away, we can plot the shapefile we've read in:
+```{r, echo = T}
+plot(snbr)
+```
+This is great for checking that you've read in the data you expect. What if we wanted to change the color? Well, that's easy:
+```{r}
+plot(snbr, col = "blue")
+```
+
+But what about visualizing information on the map? For example, what if we wanted to plot the median household income for each superneighborhood?
+
+# Customized Mapping
+Creating interesting maps in R can be challenging. To make it a bit easier, we've written a custom function called plot.heat. To load this function into your workspace, run:
+
+```{r}
+source("plot_heat.R")
+args(plot.heat)
+```
+
+args(plot.heat) will list the arguments, or inputs, to the function. Below is an example where the color of the region represents the shape of each region:
+```{r, eval=TRUE}
+library(RColorBrewer)
+
+plot.heat(snbr, snbr,
+          z = "Shape_Leng",breaks =c(ceiling(quantile(snbr@data$Shape_Leng))),
+          col.vec = brewer.pal(5, "Purples"),
+          plot.legend=T,
+          title="Median Home Value")
+```
+
+# Exporting maps as images
+
+You can save a map to your working directory as follows:
+```{r, eval=TRUE}
+png(file = "my_r_plot.png")
+plot.heat(snbr, snbr,
+          z = "Shape_Leng",breaks =c(ceiling(quantile(snbr@data$Shape_Leng))),
+          col.vec = brewer.pal(5, "Purples"),
+          plot.legend=T,
+          title="Median Home Value")
+dev.off()
+```
+
+To check that the file is there, either browse for it in your computer's file system, or peruse the list of items in your working directory for all .png files:
+```{r}
+dir(pattern = "*.png")
+```
+This also works for any other file extension, e.g. .r, .jpg, etc.
+
+# More Complicated Maps
+While it is possible to further customize your maps in R, it is probably easiest to export your data to ArcGIS, create a simple map there, then save it as an Adobe Illustrator file and do the final customizations in Adobe Illustrator (or editing software of your choice). These abilities will be covered in a later tutorial. Here's an example of a map spruced up with illustrator:
+<center>
+![Location of streetlights in Downtown Houston](Images/illustrator_arcgis.png)
+
+ </center>
